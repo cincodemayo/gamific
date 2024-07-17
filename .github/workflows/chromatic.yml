@@ -17,7 +17,8 @@ jobs:
         with:
           node-version: 20
       - name: Install dependencies
-        run: npm i
+        working-directory: ./gamific
+        run: npm ci
       - name: Run Chromatic
         uses: chromaui/action@latest
         with:
