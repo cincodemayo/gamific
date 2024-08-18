@@ -29,7 +29,7 @@ export const Secondary: Story = {
   },
 };
 
-export const Medium: Story = {
+export const Disabled: Story = {
   args: {
     size: 'medium',
     label: 'Button',

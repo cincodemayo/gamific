@@ -1,6 +1,5 @@
 import React from 'react';
 import { Cross, Drag, ExpandLess, ExpandMore, Placeholder, Star, Tick } from './Icons';
-import './button.css';
 
 interface ButtonProps {
   type? : 'contained' | 'outlined' | 'text';
