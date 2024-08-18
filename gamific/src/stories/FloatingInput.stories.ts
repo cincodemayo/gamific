@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { FloatingInput } from './Input';
 
 const meta = {
-  title: 'FloatingInput',
+  title: 'Input/FloatingInput',
   component: FloatingInput,
   parameters: {
     layout: 'centered',
