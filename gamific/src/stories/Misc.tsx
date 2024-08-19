@@ -39,8 +39,7 @@ export const Chip = ({
   return (
     <div
       className={`relative grid select-none items-center whitespace-nowrap rounded-lg ${backgroundColor} py-1.5 px-3 font-sans text-xs font-bold uppercase ${textColor}`} {...props}>
-      <span className="">{label}</span>
-      <Button type='text' size='small' icon='cross' label=''/>
+      <span className="">{label} <Button type='text' size='tiny' icon='clear' label=''/></span>
   </div>
   );
 };
