@@ -1,10 +1,13 @@
 import React from 'react';
-
 import { Button } from './Button';
-import './header.css';
+import { Avatar } from './Avatar';
 
 type User = {
   name: string;
+  avatar: {
+    type: 'image' | 'initials' | 'none';
+    text: string;
+  };
 };
 
 interface HeaderProps {
@@ -15,42 +18,38 @@ interface HeaderProps {
 }
 
 export const Header = ({ user, onLogin, onLogout, onCreateAccount }: HeaderProps) => (
-  <header>
-    <div className="storybook-header">
-      <div>
-        <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-          <g fill="none" fillRule="evenodd">
-            <path
-              d="M10 0h12a10 10 0 0110 10v12a10 10 0 01-10 10H10A10 10 0 010 22V10A10 10 0 0110 0z"
-              fill="#FFF"
-            />
-            <path
-              d="M5.3 10.6l10.4 6v11.1l-10.4-6v-11zm11.4-6.2l9.7 5.5-9.7 5.6V4.4z"
-              fill="#555AB9"
-            />
-            <path
-              d="M27.2 10.6v11.2l-10.5 6V16.5l10.5-6zM15.7 4.4v11L6 10l9.7-5.5z"
-              fill="#91BAF8"
-            />
-          </g>
-        </svg>
-        <h1>Acme</h1>
-      </div>
-      <div>
-        {user ? (
-          <>
-            <span className="welcome">
-              Welcome, <b>{user.name}</b>!
-            </span>
-            <Button size="small" onClick={onLogout} label="Log out" />
-          </>
-        ) : (
-          <>
-            <Button size="small" onClick={onLogin} label="Log in" />
-            <Button size="small" onClick={onCreateAccount} label="Sign up" />
-          </>
-        )}
+  <nav className="bg-white border border-gray-600 shadow-lg">
+    <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto pl-5">
+      <a href="http://localhost" className="flex items-center space-x-3 rtl:space-x-reverse">
+          <img src="logo.png" className="h-8" alt="Flowbite Logo" />
+          <span className="self-center text-2xl font-semibold whitespace-nowrap text-blue-500">Gamific</span>
+      </a>
+      <div className="hidden w-full md:block md:w-auto pr-5 pt-6" id="navbar-default">
+        {user == null ? 
+          <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white">
+            <li>
+              <Button type="text" size="small" label="About Us"/>
+            </li>
+            <li>
+              <Button type="text" size="small" label="Products"/>
+            </li>
+            <li>
+              <Button type="outlined" size="small" label="Log In" onClick={onLogin}/>
+            </li>
+            <li>
+              <Button type="contained" size="small" label="Sign Up" onClick={onCreateAccount}/>
+            </li>
+          </ul> : 
+          <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white">
+            <li>
+              <Avatar type={user.avatar.type} text={user.avatar.text} />
+            </li>
+            <li>
+              <Button type="contained" size="small" label="Log Out" onClick={onLogout}/>
+            </li>
+          </ul>
+        };
       </div>
     </div>
-  </header>
+    </nav>
 );

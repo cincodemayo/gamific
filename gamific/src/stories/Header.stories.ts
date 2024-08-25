@@ -25,6 +25,10 @@ export const LoggedIn: Story = {
   args: {
     user: {
       name: 'Jane Doe',
+      avatar: {
+        type: 'image',
+        text: 'dog.jpg'
+      }
     },
   },
 };

@@ -1,11 +1,11 @@
 import React from 'react';
-import { Cross, Drag, ExpandLess, ExpandMore, Placeholder, Star, Tick } from './Icons';
+import { Cross, Drag, ExpandLess, ExpandMore, Placeholder, Star, Tick, Exclamation, Info } from './Icons';
 
 interface ButtonProps {
   type? : 'contained' | 'outlined' | 'text';
   size?: 'tiny' | 'small' | 'medium';
   fullWidth?: boolean;
-  icon?: 'cross' | 'clear' | 'drag' | 'expandLess' | 'expandMore' | 'placeholder' | 'star' | 'tick' | 'none';
+  icon?: 'cross' | 'clear' | 'drag' | 'expandLess' | 'expandMore' | 'placeholder' | 'star' | 'tick' | 'exclamation' | 'info' | 'none';
   label: string;
   error?: boolean;
   onClick?: () => void;
@@ -56,6 +56,8 @@ export const Button = ({
       {icon == 'placeholder' ? Placeholder({className: placeholderIconStyle}) : ''}
       {icon == 'star' ? Star({className: iconStyle}) : ''}
       {icon == 'tick' ? Tick({className: iconStyle}) : ''}
+      {icon == 'exclamation' ? Exclamation({className: iconStyle}) : ''}
+      {icon == 'info' ? Info({className: iconStyle}) : ''}
     </button>
   );
 };
