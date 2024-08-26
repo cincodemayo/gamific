@@ -1,20 +1,25 @@
 "use client";
-import useSwr from 'swr';
+import useSWR from 'swr';
+
+import { getServerSession } from 'next-auth'
+import { authOptions } from '../pages/api/auth/[...nextauth]/route'
 
 import { Page } from "@/stories/Page";
 import { User } from "@/stories/Header";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
-export default function Home() {
-  const { data, error } = useSwr('/api/user', fetcher)
-  if (error) return <div>Failed to load users</div>
-  if (!data) return <div>Loading...</div>
+export default async function Home() {
+  const session = await getServerSession(authOptions)
+  const { data } = useSWR<User>('/api/user', fetcher)
+  
+  if (session) {
+    return (
+      <Page newUser={session.user} key="" />
+    );
+  }
   return (
-    <div>
-      {/* {data.map((user?: User) => ( */}
-        <Page newUser={{name: "John Doe", avatar: {type: "initials", text: "JD"}}} key="hi" />
-      {/* ))} */}
-    </div>
+    <Page newUser={data} key="" />
   );
+
 }
