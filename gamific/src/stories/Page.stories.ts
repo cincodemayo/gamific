@@ -15,10 +15,23 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const LoggedOut: Story = {};
+export const LoggedOut: Story = {
+  args: {
+    newUser: undefined
+  }
+};
 
 // More on interaction testing: https://storybook.js.org/docs/writing-tests/interaction-testing
 export const LoggedIn: Story = {
+  args: {
+    newUser: {
+      name: 'John Doe',
+      avatar: {
+        type: 'initials',
+        text: 'JD'
+      } 
+    }
+  },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const loginButton = canvas.getByRole('button', { name: /Log in/i });
