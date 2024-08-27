@@ -2,16 +2,16 @@ import React from 'react';
 
 import { Header, User } from './Header';
 
-export const Page: React.FC<{ newUser: User | undefined }> = ({ newUser }) => {
-  const [user, setUser] = React.useState<User>();
+"use client"
+import { signIn, signOut } from "next-auth/react";
 
+export const Page: React.FC<{ newUser: User | undefined }> = ({ newUser }) => {
   return (
     <article>
       <Header
-        user={user}
-        onLogin={() => setUser(newUser)}
-        onLogout={() => setUser(undefined)}
-        onCreateAccount={() => setUser(newUser)}
+        user={newUser}
+        onLogin={() => signIn("keycloak")}
+        onLogout={() => signOut()}
       />
 
       <section className="storybook-page">

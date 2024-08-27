@@ -2,22 +2,20 @@ import React from 'react';
 import { Button } from './Button';
 import { Avatar } from './Avatar';
 
-export type User = {
-  name: string;
-  avatar: {
-    type: 'image' | 'initials' | 'none';
-    text: string;
-  };
+export interface User {
+  name?: string | null
+  email?: string | null
+  image?: string | null
+  imageType?: 'image' | 'initials' | 'none';
 };
 
 interface HeaderProps {
   user?: User;
   onLogin?: () => void;
   onLogout?: () => void;
-  onCreateAccount?: () => void;
 }
 
-export const Header = ({ user, onLogin, onLogout, onCreateAccount }: HeaderProps) => (
+export const Header = ({ user, onLogin, onLogout }: HeaderProps) => (
   <nav className="bg-white border border-gray-600 shadow-lg">
     <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto pl-5">
       <a href="http://localhost:3000" className="flex items-center space-x-3 rtl:space-x-reverse">
@@ -34,15 +32,12 @@ export const Header = ({ user, onLogin, onLogout, onCreateAccount }: HeaderProps
               <Button type="text" size="small" label="Products"/>
             </li>
             <li>
-              <Button type="outlined" size="small" label="Log In" onClick={onLogin}/>
-            </li>
-            <li>
-              <Button type="contained" size="small" label="Sign Up" onClick={onCreateAccount}/>
+              <Button type="contained" size="small" label="Log In" onClick={onLogin}/>
             </li>
           </ul> : 
           <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white">
             <li>
-              <Avatar type={user.avatar.type} text={user.avatar.text} />
+              <Avatar type={user.imageType} text={user.image} />
             </li>
             <li>
               <Button type="contained" size="small" label="Log Out" onClick={onLogout}/>

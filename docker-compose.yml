@@ -1,9 +1,24 @@
 services:
-  db:
+  gamific-db:
     image: postgres
-    restart: always
-    shm_size: 128mb
+    volumes:
+      - gamific_data:/var/lib/postgresql/data
     environment:
+      POSTGRES_DB: gamificdb
+      POSTGRES_USER: gamific
+      POSTGRES_PASSWORD: password
+    ports:
+      - 5432:5432
+    networks:
+      - gamific
+
+  keycloak-db:
+    image: postgres
+    volumes:
+      - keycloak_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloakdb
+      POSTGRES_USER: gamific
       POSTGRES_PASSWORD: password
     ports:
       - 5432:5432
@@ -16,22 +31,27 @@ services:
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: postgres://keycloak-db
+      KC_DB_USERNAME: gamific
+      KC_DB_PASSWORD: password
     ports:
       - 8080:8080
     networks:
       - gamific
+    restart: always
+    depends_on:
+      - keycloak-db
 
   gamific:
     depends_on:
-      - db
+      - gamific-db
     container_name: gamific
     build:
       context: ./gamific
       dockerfile: dev.Dockerfile
-
     environment:
       DEPLOY_ENV: dev
-
     volumes:
       - ./gamific/src:/app/src
       - ./gamific/public:/app/public
@@ -55,3 +75,9 @@ services:
 networks:
   gamific:
     external: false
+
+volumes:
+  gamific_data:
+    driver: local
+  keycloak_data:
+    driver: local
