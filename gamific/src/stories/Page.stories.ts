@@ -26,10 +26,8 @@ export const LoggedIn: Story = {
   args: {
     newUser: {
       name: 'John Doe',
-      avatar: {
-        type: 'initials',
-        text: 'JD'
-      } 
+      imageType: 'initials',
+      image: 'JD'
     }
   },
   play: async ({ canvasElement }) => {

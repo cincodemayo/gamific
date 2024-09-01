@@ -1,9 +1,7 @@
-import React from 'react';
-
-import { Header, User } from './Header';
-
 "use client"
 import { signIn, signOut } from "next-auth/react";
+import React from 'react';
+import { Header, User } from './Header';
 
 export const Page: React.FC<{ newUser: User | undefined }> = ({ newUser }) => {
   return (

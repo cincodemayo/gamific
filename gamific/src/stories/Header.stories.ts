@@ -14,7 +14,6 @@ const meta = {
   args: {
     onLogin: fn(),
     onLogout: fn(),
-    onCreateAccount: fn(),
   },
 } satisfies Meta<typeof Header>;
 
@@ -25,11 +24,9 @@ export const LoggedIn: Story = {
   args: {
     user: {
       name: 'Jane Doe',
-      avatar: {
-        type: 'image',
-        text: 'dog.jpg'
-      }
-    },
+      image: 'dog.jpg',
+      imageType: 'image'
+    }
   },
 };
 

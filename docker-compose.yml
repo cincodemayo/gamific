@@ -21,7 +21,7 @@ services:
       POSTGRES_USER: gamific
       POSTGRES_PASSWORD: password
     ports:
-      - 5432:5432
+      - 5433:5432
     networks:
       - gamific
 
@@ -32,7 +32,8 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_DB: postgres
-      KC_DB_URL: postgres://keycloak-db
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_URL_DATABASE: keycloakdb
       KC_DB_USERNAME: gamific
       KC_DB_PASSWORD: password
     ports:
