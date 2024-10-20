@@ -71,11 +71,30 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
     networks:
-      - gamific
+      gamific:
+        # Static IP here so dnsmasq can point to Nginx easily
+        ipv4_address: 172.16.1.2
+
+  dnsmasq:
+    container_name: dnsmasq
+    image: strm/dnsmasq
+    volumes:
+      - ./dnsmasq.conf:/etc/dnsmasq.conf
+    ports:
+      - 53:53/udp
+    cap_add:
+      - NET_ADMIN
+    networks:
+      gamific:
+        ipv4_address: 172.16.1.1
 
 networks:
   gamific:
-    external: false
+    ipam:
+      config:
+        - subnet:   172.16.0.0/23
+          ip_range: 172.16.0.0/24
+
 
 volumes:
   gamific_data:
