@@ -210,7 +210,7 @@ const updateTask = async (req: NextApiRequest, res: NextApiResponse, session: Se
     const positionChanged = !!(position !== undefined && (position !== currentTaskData.position || columnChanged));
     const column =
         columnChanged || positionChanged
-            ? await prisma.column.findFirst({
+            ? await prisma.missionColumn.findFirst({
                   where: { id: column_id || currentTaskData.column_id },
                   include: { tasks: true },
               })

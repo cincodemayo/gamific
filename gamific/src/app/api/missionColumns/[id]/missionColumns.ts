@@ -6,7 +6,7 @@ import { getSession } from 'next-auth/react';
 import { Session } from 'next-auth';
 
 const decrementHigherPositions = (missionId: string, position: number) => {
-    return prisma.column.updateMany({
+    return prisma.missionColumn.updateMany({
         where: {
             mission_id: missionId,
             position: {
@@ -20,7 +20,7 @@ const decrementHigherPositions = (missionId: string, position: number) => {
 };
 
 const incrementFromPosition = (missionId: string, position: number) => {
-    return prisma.column.updateMany({
+    return prisma.missionColumn.updateMany({
         where: {
             mission_id: missionId,
             position: {
@@ -60,7 +60,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 const getColumn = async (req: NextApiRequest, res: NextApiResponse, session: Session) => {
     const column_id = req.query.id?.toString();
     try {
-        const column = await prisma.column.findFirst({
+        const column = await prisma.missionColumn.findFirst({
             where: {
                 id: column_id,
                 account_id: session.user.account_id,
@@ -82,7 +82,7 @@ const getColumn = async (req: NextApiRequest, res: NextApiResponse, session: Ses
 const updateColumn = async (req: NextApiRequest, res: NextApiResponse, session: Session) => {
     const column_id = req.query.id?.toString();
     const columnData: UpdatedColumnData = req.body;
-    const currentColumnData = await prisma.column.findFirst({
+    const currentColumnData = await prisma.missionColumn.findFirst({
         where: {
             id: column_id,
             account_id: session.user.account_id
@@ -121,7 +121,7 @@ const updateColumn = async (req: NextApiRequest, res: NextApiResponse, session: 
 
 const deleteColumn = async (req: NextApiRequest, res: NextApiResponse, session: Session) => {
     const columnId = req.query.id?.toString();
-    const columnData = await prisma.column.findFirst({
+    const columnData = await prisma.missionColumn.findFirst({
         where: {
             id: columnId,
             account_id: session.user.account_id,
@@ -132,7 +132,7 @@ const deleteColumn = async (req: NextApiRequest, res: NextApiResponse, session: 
     }
     try {
         await prisma.$transaction([
-            prisma.column.delete({
+            prisma.missionColumn.delete({
                 where: {
                     id: columnId,
                 },

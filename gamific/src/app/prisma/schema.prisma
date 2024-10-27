@@ -14,6 +14,7 @@ model Journey {
   name        String           @db.VarChar(255)
   description String?          @db.VarChar(1023)
   account_id  String
+  completed   Boolean          @default(false)
   columns     JourneyColumn[]  @relation("JourneyColumn")
   account     Account          @relation(fields: [account_id], references: [id])
 
@@ -44,6 +45,7 @@ model Mission {
   description   String?          @db.VarChar(1023)
   position      Int
   account_id    String
+  completed     Boolean          @default(false)
   columns       MissionColumn[]  @relation("MissionColumn")
   users         UsersOnMissions[]
   account       Account          @relation(fields: [account_id], references: [id])

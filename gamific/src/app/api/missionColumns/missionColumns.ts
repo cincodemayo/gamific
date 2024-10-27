@@ -32,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 const getColumns = async (res: NextApiResponse, session: Session) => {
     try {
-        const tasks = await prisma.column.findMany({
+        const tasks = await prisma.missionColumn.findMany({
             where: {
                 account_id: session.user.account_id,
             },

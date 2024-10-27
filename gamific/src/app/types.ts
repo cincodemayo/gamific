@@ -3,6 +3,7 @@ export type Journey = {
     name: string;
     description: string;
     account_id: string;
+    completed: boolean;
 }
 
 export type JourneyColumn = {
@@ -21,6 +22,7 @@ export type Mission = {
     position: number;
     column_id: string;
     account_id: string;
+    completed: boolean;
     users: string[];
 }
 
@@ -87,4 +89,13 @@ export type UpdatedColumnData = {
     name?: string;
     color?: string;
     position?: number;
+};
+
+export type OptionalMissionData = {
+    name?: string;
+    description?: string;
+    position?: number;
+    column_id?: string;
+    users?: string[];
+    completed?: string[];
 };

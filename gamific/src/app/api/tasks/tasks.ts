@@ -95,7 +95,7 @@ const createTask = async (req: NextApiRequest, res: NextApiResponse, session: Se
         related_tasks: taskData.related_tasks ?? [],
         completed: false
     };
-    const columnData = await prisma.column.findUnique({
+    const columnData = await prisma.missionColumn.findUnique({
         where: {
             id: task.column_id,
             account_id: session.user.account_id
@@ -115,7 +115,7 @@ const createTask = async (req: NextApiRequest, res: NextApiResponse, session: Se
             subtasks: {},
             related_tasks: task.related_tasks,
             completed: task.completed,
-            column: {
+            missionColumn: {
                 connect: {
                     id: task.column_id,
                 },
