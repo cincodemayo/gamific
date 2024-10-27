@@ -30,8 +30,8 @@ const updateSubtask = async (req: NextApiRequest, res: NextApiResponse, session:
             account_id: session.user.account_id,
         },
     });
-    const { name, completed } = req.body;
-    if (typeof name === 'undefined' && typeof completed === 'undefined') {
+    const { name, description, completed } = req.body;
+    if (typeof name === 'undefined' && typeof description === 'undefined' && typeof completed === 'undefined') {
         return res.status(400).end('No data to update');
     }
 
@@ -41,6 +41,7 @@ const updateSubtask = async (req: NextApiRequest, res: NextApiResponse, session:
 
     const newSubtaskData = {
         name: typeof name === 'string' ? name : currentSubtaskData.name,
+        description: typeof description === 'string' ? name : currentSubtaskData.description,
         completed: typeof completed === 'boolean' ? completed : currentSubtaskData.completed,
     };
     const response = await prisma.subtask.update({

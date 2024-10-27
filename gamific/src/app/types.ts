@@ -1,12 +1,7 @@
-export type Product = {
-    id: string;
-    name: string;
-    account_id: string;
-}
-  
 export type Journey = {
     id: string;
     name: string;
+    description: string;
     account_id: string;
 }
 
@@ -22,8 +17,11 @@ export type JourneyColumn = {
 export type Mission = {
     id: string;
     name: string;
-    user_id: string;
+    description: string;
+    position: number;
+    column_id: string;
     account_id: string;
+    users: string[];
 }
 
 export type MissionColumn = {
@@ -52,10 +50,26 @@ export type Task = {
 export type Subtask = {
     id: string;
     name: string;
+    description: string;
     task_id: string;
     account_id: string;
     completed: boolean;
 };
+
+export type Milestone = {
+    id: string;
+    name: string;
+    description: string;
+    account_id: string;
+}
+
+export type Prize = {
+    id: string;
+    name: string;
+    description: string;
+    points: number;
+    account_id: string;
+}
 
 export type OptionalTaskData = {
     name?: string;
