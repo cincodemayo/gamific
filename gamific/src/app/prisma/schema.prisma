@@ -66,9 +66,9 @@ model MissionColumn {
   updated_at DateTime? @default(now()) @db.Timestamp(0)
   name       String    @db.VarChar(255)
   mission_id String
+  account_id String
   position   Int
   color      String    @db.VarChar(255)
-  account_id String
   mission    Mission   @relation("MissionColumn", fields: [mission_id], references: [id], onDelete: Cascade)
   tasks      Task[]    @relation("ColumnTask")
   account    Account   @relation(fields: [account_id], references: [id])
@@ -94,7 +94,7 @@ model Task {
   account       User      @relation("Account", fields: [account_id], references: [id], onDelete: Cascade)
   subtasks      Subtask[] @relation("TaskSubtask")
 
-  @@index([column_id])
+  @@index([column_id, account_id])
 }
 
 model Subtask {
@@ -103,10 +103,12 @@ model Subtask {
   updated_at DateTime? @default(now()) @db.Timestamp(0)
   name       String    @db.VarChar(255)
   task_id    String
+  account_id String
   completed  Boolean   @default(false)
   task       Task      @relation("TaskSubtask", fields: [task_id], references: [id], onDelete: Cascade)
+  account    User      @relation("Account", fields: [account_id], references: [id], onDelete: Cascade)
 
-  @@index([task_id])
+  @@index([task_id, account_id])
 } 
 
 model Account {

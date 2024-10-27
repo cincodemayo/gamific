@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '../../../utils/db';
+import { prisma } from '@/app/utils/db';
 import { validate } from 'uuid';
 import { getSession } from 'next-auth/react';
+import { Session } from 'next-auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const session = await getSession({ req });
@@ -13,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     switch (req.method) {
         case 'PUT': {
-            return await updateSubtask(req, res);
+            return await updateSubtask(req, res, session);
         }
         default:
             res.status(405).end('Method not allowed');
@@ -21,11 +22,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 }
 
-const updateSubtask = async (req: NextApiRequest, res: NextApiResponse) => {
+const updateSubtask = async (req: NextApiRequest, res: NextApiResponse, session: Session) => {
     const subtaskId = req.query.id!.toString();
     const currentSubtaskData = await prisma.subtask.findFirst({
         where: {
             id: subtaskId,
+            account_id: session.user.account_id,
         },
     });
     const { name, completed } = req.body;
@@ -44,6 +46,7 @@ const updateSubtask = async (req: NextApiRequest, res: NextApiResponse) => {
     const response = await prisma.subtask.update({
         where: {
             id: subtaskId,
+            account_id: session.user.account_id,
         },
         data: newSubtaskData,
     });

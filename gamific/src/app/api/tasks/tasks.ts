@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '../../utils/db';
+import { prisma } from '@/app/utils/db';
 import { v4 as uuidv4, validate } from 'uuid';
-import { Task } from '../../types';
+import { Task } from '@/app/types';
 import { getSession } from 'next-auth/react';
 import { Session } from 'next-auth';
 
@@ -75,6 +75,7 @@ const createTask = async (req: NextApiRequest, res: NextApiResponse, session: Se
     const existingColumnTasks = await prisma.task.findMany({
         where: {
             column_id: taskData.column_id,
+            account_id: session.user.account_id
         },
         orderBy: {
             position: 'desc',
@@ -97,6 +98,7 @@ const createTask = async (req: NextApiRequest, res: NextApiResponse, session: Se
     const columnData = await prisma.column.findUnique({
         where: {
             id: task.column_id,
+            account_id: session.user.account_id
         },
     });
     if (!columnData) {
@@ -110,8 +112,6 @@ const createTask = async (req: NextApiRequest, res: NextApiResponse, session: Se
             description: task.description,
             position: task.position,
             points: task.points,
-            user_id: task.user_id,
-            account_id: task.account_id,
             subtasks: {},
             related_tasks: task.related_tasks,
             completed: task.completed,
