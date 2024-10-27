@@ -33,6 +33,7 @@ const validateTask = (data: unknown): data is Task => {
         'points' in data && typeof data.points === 'number' &&
         (!('description' in data) || typeof data.description === 'string') &&
         (!('user_id' in data) || typeof data.user_id === 'string') &&
+        (!('account_id' in data) || typeof data.account_id === 'string') &&
         (!('related_tasks' in data) || data.related_tasks instanceof Array) &&
         (!('subtasks' in data) || data.subtasks instanceof Array)
     );
@@ -40,7 +41,14 @@ const validateTask = (data: unknown): data is Task => {
 
 const getTasks = async (res: NextApiResponse, session: Session) => {
     try {
-        const tasks = await prisma.task.findMany();
+        const tasks = await prisma.task.findMany({
+            where: {
+                account_id: session.user.account_id,
+            },
+            orderBy: {
+                position: 'asc',
+            },
+        });
         res.status(200).json(tasks);
     } catch (error) {
         res.status(500).json({ error });
@@ -77,13 +85,14 @@ const createTask = async (req: NextApiRequest, res: NextApiResponse, session: Se
         id: uuidv4(),
         name: taskData.name,
         description: taskData.description,
+        position: existingColumnTasks.length ? existingColumnTasks[0].position + 1 : 0,
+        points: taskData.points,
         column_id: taskData.column_id,
         user_id: taskData.user_id ?? session.user.id,
+        account_id: session.user.account_id,
         subtasks: taskData.subtasks ?? [],
-        points: taskData.points,
-        position: existingColumnTasks.length ? existingColumnTasks[0].position + 1 : 0,
-        completed: false,
-        related_tasks: taskData.related_tasks ?? []
+        related_tasks: taskData.related_tasks ?? [],
+        completed: false
     };
     const columnData = await prisma.column.findUnique({
         where: {
@@ -99,12 +108,13 @@ const createTask = async (req: NextApiRequest, res: NextApiResponse, session: Se
             id: task.id,
             name: task.name,
             description: task.description,
-            subtasks: {},
-            points: task.points,
             position: task.position,
-            completed: task.completed,
-            related_tasks: task.related_tasks,
+            points: task.points,
             user_id: task.user_id,
+            account_id: task.account_id,
+            subtasks: {},
+            related_tasks: task.related_tasks,
+            completed: task.completed,
             column: {
                 connect: {
                     id: task.column_id,
@@ -115,6 +125,11 @@ const createTask = async (req: NextApiRequest, res: NextApiResponse, session: Se
                     id: task.user_id,
                 },
             },
+            account: {
+                connect: {
+                    id: task.account_id,
+                },
+            }
         },
     };
     if (task.subtasks) {

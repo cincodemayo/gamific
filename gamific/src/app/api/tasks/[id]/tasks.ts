@@ -3,7 +3,6 @@ import { prisma } from '../../../utils/db';
 import { validate, v4 as uuidv4 } from 'uuid';
 import { Subtask, OptionalTaskData } from '../../../types';
 import { getSession } from 'next-auth/react';
-import { Session } from 'next-auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const session = await getSession({ req });
@@ -11,17 +10,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(401).end('Unauthorized');
     }
     if (!req.query.id || !validate(req.query.id.toString())) {
-        return res.status(400).end('Invalid task ID');
+        return res.status(400).end('Invalid task id');
     }
     switch (req.method) {
         case 'GET': {
-            return await getTask(req, res, session);
+            return await getTask(req, res);
         }
         case 'PUT': {
-            return await updateTask(req, res, session);
+            return await updateTask(req, res);
         }
         case 'DELETE': {
-            return await deleteTask(req, res, session);
+            return await deleteTask(req, res);
         }
         default:
             res.status(405).end('Method not allowed');
@@ -57,7 +56,93 @@ const incrementFromPosition = (columnId: string, position: number) => {
     });
 };
 
-const updateTaskData = (taskId: string, taskData: OptionalTaskData, subtasksToDelete: string[], session: Session) => {
+const getTask = async (req: NextApiRequest, res: NextApiResponse) => {
+    const taskId = req.query.id?.toString();
+    if (!taskId) {
+        return res.status(400).end('Task id is required');
+    }
+    try {
+        const task = await prisma.task.findFirst({
+            where: {
+                id: taskId,
+            },
+            include: {
+                subtasks: {
+                    orderBy: {
+                        id: 'asc',
+                    },
+                },
+            },
+        });
+        if (!task) {
+            res.status(404).end('Task not found');
+        } else {
+            res.status(200).json(task);
+        }
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: 'Something went wrong' });
+    }
+};
+
+const deleteTask = async (req: NextApiRequest, res: NextApiResponse) => {
+    const taskId = req.query.id?.toString();
+    if (!taskId) {
+        return res.status(400).end('Task id is required');
+    }
+    const taskData = await prisma.task.findFirst({
+        where: {
+            id: taskId,
+        }
+    });
+    if (!taskData) {
+        return res.status(404).end('Task not found');
+    }
+    try {
+        await prisma.$transaction([
+            prisma.task.delete({
+                where: {
+                    id: taskId,
+                },
+            }),
+            decrementHigherPositions(taskData.column_id, taskData.position),
+        ]);
+        res.status(200).end('Task deleted');
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: 'Something went wrong' });
+    }
+};
+
+const validateTaskUpdateData = (taskData: any) => {
+    if (Object.keys(taskData).length === 0) {
+        return 'No data to update';
+    }
+    if (taskData.name && typeof taskData.name !== 'string') {
+        return 'Invalid name';
+    }
+    if (taskData.description && typeof taskData.description !== 'string') {
+        return 'Invalid description';
+    }
+    if (taskData.position && typeof taskData.position !== 'number') {
+        return 'Invalid position';
+    }
+    if (taskData.points && typeof taskData.points !== 'number') {
+        return 'Invalid points';
+    }
+    if (taskData.column_id && typeof taskData.column_id !== 'string') {
+        return 'Invalid column id';
+    }
+    if (taskData.user_id && typeof taskData.user_id !== 'string') {
+        return 'Invalid user id';
+    }
+    if (taskData.column && !validate(taskData.column)) {
+        return 'Invalid column';
+    }
+    return;
+};
+
+const updateTaskData = (taskId: string, taskData: OptionalTaskData, subtasksToDelete: string[]) => {
     const { subtasks, ...data } = taskData;
     return prisma.$transaction(async () => {
         if (subtasksToDelete.length > 0) {
@@ -99,25 +184,6 @@ const updateTaskData = (taskId: string, taskData: OptionalTaskData, subtasksToDe
     });
 };
 
-const validateTaskUpdateData = (taskData: any) => {
-    if (Object.keys(taskData).length === 0) {
-        return 'No data to update';
-    }
-    if (taskData.column && !validate(taskData.column)) {
-        return 'Invalid column ID';
-    }
-    if (taskData.position && typeof taskData.position !== 'number') {
-        return 'Invalid position';
-    }
-    if (taskData.name && typeof taskData.name !== 'string') {
-        return 'Invalid name';
-    }
-    if (taskData.description && typeof taskData.description !== 'string') {
-        return 'Invalid description';
-    }
-    return;
-};
-
 const validateColumns = async (columnIds: string[]) => {
     let columnsAreValid = true;
     for (const columnId of columnIds) {
@@ -141,68 +207,10 @@ const validateColumns = async (columnIds: string[]) => {
     return columnsAreValid;
 };
 
-const getTask = async (req: NextApiRequest, res: NextApiResponse, session: Session) => {
+const updateTask = async (req: NextApiRequest, res: NextApiResponse) => {
     const taskId = req.query.id?.toString();
     if (!taskId) {
         return res.status(400).end('Task id is required');
-    }
-    try {
-        const task = await prisma.task.findFirst({
-            where: {
-                id: taskId,
-            },
-            include: {
-                subtasks: {
-                    orderBy: {
-                        id: 'asc',
-                    },
-                },
-            },
-        });
-        if (!task) {
-            res.status(404).end('Task not found');
-        } else {
-            res.status(200).json(task);
-        }
-    } catch (e) {
-        console.error(e);
-        res.status(500).json({ error: 'Something went wrong' });
-    }
-};
-
-const deleteTask = async (req: NextApiRequest, res: NextApiResponse, session: Session) => {
-    const taskId = req.query.uuid?.toString();
-    if (!taskId) {
-        return res.status(400).end('Task id is required');
-    }
-    const taskData = await prisma.task.findFirst({
-        where: {
-            id: taskId,
-        }
-    });
-    if (!taskData) {
-        return res.status(404).end('Task not found');
-    }
-    try {
-        await prisma.$transaction([
-            prisma.task.delete({
-                where: {
-                    id: taskId,
-                },
-            }),
-            decrementHigherPositions(taskData.column_id, taskData.position),
-        ]);
-        res.status(200).end('Task deleted');
-    } catch (e) {
-        console.error(e);
-        res.status(500).json({ error: 'Something went wrong' });
-    }
-};
-
-const updateTask = async (req: NextApiRequest, res: NextApiResponse, session: Session) => {
-    const taskId = req.query.id?.toString();
-    if (!taskId) {
-        return res.status(400).end('Task uuid is required');
     }
     const err = validateTaskUpdateData(req.body);
     if (err) {
@@ -219,7 +227,7 @@ const updateTask = async (req: NextApiRequest, res: NextApiResponse, session: Se
     if (!currentTaskData) {
         return res.status(404).end('Task not found');
     }
-    let { name, description, column_uuid: column_id, subtasks, position } = req.body;
+    let { name, description, position, points, column_id, user_id, subtasks, related_tasks, completed } = req.body;
     const columnChanged = !!(column_id && column_id !== currentTaskData.column_id);
     const positionChanged = !!(position !== undefined && (position !== currentTaskData.position || columnChanged));
     const column =
@@ -267,30 +275,34 @@ const updateTask = async (req: NextApiRequest, res: NextApiResponse, session: Se
     const newTaskData: OptionalTaskData = {
         name: name || currentTaskData.name,
         description: typeof description === undefined ? currentTaskData.description : description,
+        position: position !== undefined ? position : currentTaskData.position,
+        points: points !== undefined ? points : currentTaskData.points,
+        user_id: user_id !== undefined ? user_id : currentTaskData.user_id,
         column_id: column_id || currentTaskData.column_id,
         subtasks: subtasks || currentTaskData.subtasks,
-        position: position !== undefined ? position : currentTaskData.position,
+        related_tasks: related_tasks || currentTaskData.related_tasks,
+        completed: completed !== undefined ? completed : currentTaskData.completed,
     };
 
     await prisma.$transaction(async () => {
         if (!columnChanged && !positionChanged) {
-            await updateTaskData(taskId, newTaskData, subtasksToDelete, session);
+            await updateTaskData(taskId, newTaskData, subtasksToDelete);
             return res.status(200).end('Task updated');
         }
         if (columnChanged && !column) {
             return res.status(404).end('Column not found');
         }
         if (columnChanged && !positionChanged) newTaskData.position = column!.tasks.length; // If position is not set, move to end of column
-        await decrementHigherPositions(currentTaskData.column_uuid, currentTaskData.position);
+        await decrementHigherPositions(currentTaskData.column_id, currentTaskData.position);
         if (positionChanged && !movingToEndOfColumn) {
-            await incrementFromPosition(columnChanged ? column_id : currentTaskData.column_uuid, position);
+            await incrementFromPosition(columnChanged ? column_id : currentTaskData.column_id, position);
         }
-        await updateTaskData(taskId, newTaskData, subtasksToDelete, session);
+        await updateTaskData(taskId, newTaskData, subtasksToDelete);
         const dataAfterUpdateIsValid = await validateColumns(
-            columnChanged ? [column_id, currentTaskData.column_uuid] : [currentTaskData.column_uuid]
+            columnChanged ? [column_id, currentTaskData.column_id] : [currentTaskData.column_id]
         );
         if (!dataAfterUpdateIsValid) {
-            throw new Error('Invalid position of tasks after update');
+            throw new Error('Invalid task after update');
         }
         return res.status(200).end('Task updated');
     });
