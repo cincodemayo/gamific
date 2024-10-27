@@ -1,13 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/app/utils/db';
 import { v4 as uuidv4, validate } from 'uuid';
-import { MissionColumn } from '@/app/types';
+import { JourneyColumn } from '@/app/types';
 import { getSession } from 'next-auth/react';
 import { Session } from 'next-auth';
 
-const isNewColumn = (column: unknown): column is MissionColumn => {
+const isNewColumn = (column: unknown): column is JourneyColumn => {
     return (
-        typeof column === 'object' && column !== null && 'mission_id' in column && 'name' in column && 'color' in column
+        typeof column === 'object' && column !== null && 'journey_id' in column && 'name' in column && 'color' in column
     );
 };
 
@@ -32,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 const getColumns = async (res: NextApiResponse, session: Session) => {
     try {
-        const tasks = await prisma.missionColumn.findMany({
+        const tasks = await prisma.journeyColumn.findMany({
             where: {
                 account_id: session.user.account_id,
             },
@@ -48,35 +48,35 @@ const createColumn = async (req: NextApiRequest, res: NextApiResponse, session: 
     if (!isNewColumn(columnData)) {
         return res.status(400).json({ error: 'Invalid column data' });
     }
-    if (!columnData.mission_id || !validate(columnData.mission_id)) {
-        return res.status(400).json({ error: 'Invalid mission id' });
+    if (!columnData.journey_id || !validate(columnData.journey_id)) {
+        return res.status(400).json({ error: 'Invalid journey id' });
     }
     if (columnData.name.length < 1 || columnData.name.length > 20) {
         return res.status(400).json({ error: 'Column name must be between 1 and 20 characters' });
     }
-    const missionData = await prisma.mission.findFirst({
+    const journeyData = await prisma.journey.findFirst({
         where: {
-            id: columnData.mission_id,
+            id: columnData.journey_id,
             account_id: session.user.account_id,
         },
         include: {
-            missionColumns: true,
+            journeyColumns: true,
         },
     });
-    if (!missionData) {
-        return res.status(404).json({ error: 'Mission not found' });
+    if (!journeyData) {
+        return res.status(404).json({ error: 'journey not found' });
     }
-    if (missionData.columns.find((column: MissionColumn) => column.name.toLowerCase() === columnData.name.toLowerCase())) {
-        return res.status(400).json({ error: 'Column with this name already exists on this mission' });
+    if (journeyData.columns.find((column: JourneyColumn) => column.name.toLowerCase() === columnData.name.toLowerCase())) {
+        return res.status(400).json({ error: 'Column with this name already exists on this journey' });
     }
     const positionSet = columnData.position !== undefined;
-    columnData.position = columnData.position ?? missionData.columns.length;
+    columnData.position = columnData.position ?? journeyData.columns.length;
     try {
         const response = await prisma.$transaction(async (tx: any) => {
             if (positionSet) {
                 await tx.column.updateMany({
                     where: {
-                        mission_id: columnData.mission_id,
+                        journey_id: columnData.journey_id,
                         position: {
                             gte: columnData.position,
                         },
@@ -94,9 +94,9 @@ const createColumn = async (req: NextApiRequest, res: NextApiResponse, session: 
                     name: columnData.name,
                     position: columnData.position as number,
                     color: columnData.color,
-                    mission: {
+                    journey: {
                         connect: {
-                            id: columnData.mission_id,
+                            id: columnData.journey_id,
                         },
                     },
                     account: {
@@ -109,6 +109,6 @@ const createColumn = async (req: NextApiRequest, res: NextApiResponse, session: 
         });
         return res.status(200).json(response);
     } catch (err) {
-        return res.status(500).json('Error creating mission column');
+        return res.status(500).json('Error creating journey column');
     }
 };
