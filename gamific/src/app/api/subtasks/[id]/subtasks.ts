@@ -9,7 +9,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!session) {
         return res.status(401).end('Unauthorized');
     }
-    if (!req.query.uuid || !validate(req.query.uuid.toString())) {
+    if (!req.query.id || !validate(req.query.id.toString())) {
         return res.status(400).end('Invalid subtask id');
     }
     switch (req.method) {

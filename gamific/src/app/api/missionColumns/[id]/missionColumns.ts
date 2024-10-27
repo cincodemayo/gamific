@@ -39,7 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(401).end('Unauthorized');
     }
 
-    if (!req.query.uuid || !validate(req.query.uuid.toString())) {
+    if (!req.query.id || !validate(req.query.id.toString())) {
         return res.status(400).end('Invalid column id');
     }
     switch (req.method) {
@@ -101,8 +101,8 @@ const updateColumn = async (req: NextApiRequest, res: NextApiResponse, session: 
     try {
         const response = await prisma.$transaction(async (tx: any) => {
             if (position !== undefined && position !== currentColumnData.position) {
-                await decrementHigherPositions(currentColumnData.board_uuid, currentColumnData.position);
-                await incrementFromPosition(currentColumnData.board_uuid, position);
+                await decrementHigherPositions(currentColumnData.mission_id, currentColumnData.position);
+                await incrementFromPosition(currentColumnData.mission_id, position);
             }
             return await tx.column.update({
                 where: {
